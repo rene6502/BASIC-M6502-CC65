@@ -1,4 +1,47 @@
-# Microsoft BASIC for 6502 Microprocessor - Version 1.1
+# Microsoft BASIC for 6502 Microprocessor - cc65 version
+
+This project provides a version of [BASIC-M6502](https://github.com/microsoft/BASIC-M6502)
+that is compatible with the [cc65 compiler suite](https://cc65.github.io/).\
+It includes a Java program that translates MACRO-10 syntax into cc65 syntax,
+along with a short build script for the Commodore version.\
+The produced Commodore version is **Commodore BASIC 2** for the **PET** and identical to
+[this](https://github.com/mist64/msbasic/blob/master/orig/cbmbasic2.bin) version built by Michael Steil.
+
+## Targets
+
+- The **Commodore** build is the only one that produces an output identical to the released version.\
+  This makes it the only target with a verifiable result, and therefore the main focus of this project.
+- The **KIM** and **OSI** targets can still be assembled, but Microsoft's source code evolved significantly after their release.\
+  The current codebase can no longer reproduce those early versions, so they cannot be verified.
+- The **Apple** target is based on newer sources, but Apple introduced many unpublished extensions (e.g., graphics and I/O functions).\
+  Because of this, its output also cannot be verified.
+
+## Tools
+
+For building, use Java 21 and the cc65 versions:
+
+- Linux: ca65 V2.18 - Debian 2.19-2
+- Windows: ca65 V2.19 - Git 357f64e
+  
+## Example build on Debian 13
+
+```sh
+>./build.sh
+ca65 V2.18 - Debian 2.19-2
+CONFIG: REALIO=3
+CONFIG: TARGET=COMMODORE
+CONFIG: ADDITIONAL PRECISION
+CONFIG: LONG ERRORS
+CONFIG: SAVE AND LOAD
+CONFIG: ROM
+CONFIG: USE ROR INSTRUCTION
+
+File:   commodore.bin
+Length: 8670 bytes
+MD5:    65fbddc1114c5ca4648cf31d6a9a2891
+```
+
+## Original README
 
 ## Historical Significance
 
