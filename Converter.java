@@ -56,6 +56,10 @@ public class Converter {
     Path inputFile = Path.of(args[0]);
     Path outputFile = Path.of(args[1]);
 
+    System.out.printf("Convert MACRO-10 source file to cc65 syntax\n");
+    System.out.printf("Input File: %s\n", inputFile.toString());
+    System.out.printf("Output File: %s\n", outputFile.toString());
+
     Converter converter = new Converter();
     List<String> lines = Files.readAllLines(inputFile);
     lines = converter.convertClean(lines);
@@ -340,7 +344,7 @@ public class Converter {
         String code = matchIfPass2.group(1);
         Block block = getAngledBlock(code, lines);
         if (block.lines().stream().noneMatch(s -> s.contains("PURGE"))) {
-          result.addAll(block.lines); // add blocks if they are not using MACRO-10 PURGE instruction
+          result.addAll(block.lines); // add block if they are not using MACRO-10 PURGE instruction
         }
       } else {
         result.add(line);
@@ -395,16 +399,16 @@ public class Converter {
     }
 
     result.add(".IF " + condition);
-    result.addAll(block.lines());
-    if (result.getLast().isEmpty()) {
-      result.removeLast();
+    List<String> blockLines = new ArrayList<>(block.lines());
+    if (blockLines.getLast().isEmpty()) {
+      blockLines.removeLast();
     }
-    result.add(".ENDIF");
-
     if (!block.trailing().isEmpty()) {
-      String lastLine = result.removeLast();
-      result.add(lastLine + block.trailing());
+      String lastLine = blockLines.removeLast();
+      blockLines.add(lastLine + block.trailing());
     }
+    result.addAll(blockLines);
+    result.add(".ENDIF");
   }
 
   // get statements to print out configuration during assemble
@@ -819,7 +823,7 @@ public class Converter {
       // ADR -> .WORD
       Matcher matchAdr = Pattern.compile("^ADR\\t*\\((\\S+)\\)$").matcher(parsed.instruction());
       if (matchAdr.matches()) {
-        String replace = parsed.label() + ".WORD " + matchAdr.group(1);
+        String replace = parsed.label() + ".WORD " + matchAdr.group(1) + parsed.comment();
         result.add(replace);
         continue;
       }
@@ -1004,6 +1008,9 @@ public class Converter {
 
         if (level == 0) {
           result.add(buffer.toString());
+          if (result.getFirst().isEmpty()) {
+            result.removeFirst();
+          }
           return new Block(result, line.substring(i + 1));
         }
       }
