@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,13 +65,12 @@ public class Converter {
     List<String> lines = Files.readAllLines(inputFile);
     lines = converter.convertClean(lines);
     lines = converter.replaceTextBlocks(lines);
-    for (int i = 0; i < 5; i++) {
-      lines = converter.convertIf(lines);
-    }
+    lines = converter.convertUntilUnchanged(lines, converter::convertIf);
     lines = converter.convertMacros(lines);
     lines = converter.convertSymbols(lines);
     lines = converter.convertRepeat(lines);
     lines = converter.convertInstructions(lines);
+    lines = converter.expandTabs(lines);
     Files.write(outputFile, lines);
   }
 
@@ -312,6 +312,19 @@ public class Converter {
     result = replaceTextBlock(result, "\tEND\t$Z+START", "");
 
     return result;
+  }
+
+  private List<String> convertUntilUnchanged(
+      List<String> input, Function<List<String>, List<String>> converter) {
+    List<String> lines = input;
+    while (true) {
+      List<String> before = new ArrayList<>(lines);
+      lines = converter.apply(lines);
+      if (lines.equals(before)) {
+        break;
+      }
+    }
+    return lines;
   }
 
   // convert MACRO-10 IF conditions (IFE, IFN, IF1, IF2)
@@ -919,6 +932,34 @@ public class Converter {
       default:
         return null;
     }
+  }
+
+  private String expandTabs(String line) {
+    StringBuilder result = new StringBuilder();
+    int col = 0;
+    for (int i = 0; i < line.length(); i++) {
+      char ch = line.charAt(i);
+      if (ch == '\t') {
+        int nextStop = ((col / 8) + 1) * 8;
+        result.append(" ".repeat(nextStop - col));
+        col = nextStop;
+      } else {
+        result.append(ch);
+        col++;
+      }
+    }
+    return result.toString();
+  }
+
+  private List<String> expandTabs(List<String> lines) {
+    List<String> result = new ArrayList<>();
+
+    while (!lines.isEmpty()) {
+      String line = lines.removeFirst();
+      line = expandTabs(line);
+      result.add(line);
+    }
+    return result;
   }
 
   // search and replace text block supporting blocks with multiple lines
