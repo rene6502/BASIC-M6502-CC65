@@ -3066,7 +3066,7 @@ OUTSPC:
 .IF REALIO<>3
         LDA     #' '
 .ENDIF
-.IF REALIO=3
+.IF EXTIO<>0
         LDA     CHANNL
         BEQ     CRTSKP
         LDA     #' '
@@ -3765,8 +3765,8 @@ QSTATV:
         BNE     GOMOVF
         LDA     CQSTAT
         JMP     FLOAT
-GOMOVF:
 .ENDIF
+GOMOVF:
 .IF (TIME|EXTIO)<>0
         LDWD    FACMO
 .ENDIF

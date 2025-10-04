@@ -203,6 +203,26 @@ public class Converter {
         FBUFFR=$0100>
         """);
 
+    // fix access to CHANNL if EXTIO=0
+    result = replaceTextBlock(result, """
+        IFE\tREALIO-3,<
+        \tLDA\tCHANNL
+        \tBEQ\tCRTSKP
+        """, """
+        IFN\tEXTIO,<
+        \tLDA\tCHANNL
+        \tBEQ\tCRTSKP
+        """);
+
+    // fix missing GOMOVF label if EXTIO=0
+    result = replaceTextBlock(result, """
+        \tJMP\tFLOAT
+        GOMOVF:>
+        """, """
+        \tJMP\tFLOAT>
+        GOMOVF:
+        """);
+
     // insert missing NOP for Commodore
     result = replaceTextBlock(result, """
         \tBEQ\tDIRCON
