@@ -2,7 +2,8 @@
 
 This project provides a version of [BASIC-M6502](https://github.com/microsoft/BASIC-M6502)
 that is compatible with the [cc65 compiler suite](https://cc65.github.io/).\
-It includes a Java program that translates the original MACRO-10 source file into a cc65 file, along with a short build script for the Commodore version.\
+It includes a Java program that translates the original MACRO-10 source file into a cc65 file,
+along with a short build script for the Commodore version.\
 The produced Commodore version is **Commodore BASIC 2** for the **PET** and identical to
 [this](https://github.com/mist64/msbasic/blob/master/orig/cbmbasic2.bin) version built by Michael Steil.
 
@@ -46,15 +47,21 @@ CONFIG: USE ROR INSTRUCTION
 File:   commodore.bin
 Length: 8670 bytes
 MD5:    65fbddc1114c5ca4648cf31d6a9a2891
+
+File:   m6502-cbm.bin
+Length: 8670 bytes
+MD5:    65fbddc1114c5ca4648cf31d6a9a2891
 ```
 
 ## Files
 
-| File                             | Description                                       |
-|----------------------------------|---------------------------------------------------|
-| [m6502.asm](m6502.asm)           | original MACRO-10 source file                     |
-| [m6502.s](m6502.s)               | cc65 version capable of building multiple targets |
-| [Converter.java](Converter.java) | The converter program                             |
+| File                             | Description                                                |
+|----------------------------------|------------------------------------------------------------|
+| [m6502.asm](m6502.asm)           | Original MACRO-10 source file                               |
+| [m6502.s](m6502.s)               | cc65 version capable of building multiple targets           |
+| [m6502-cbm.s](m6502-cbm.s)       | cc65 version streamlined for Commodore-only builds          |
+| [Converter.java](Converter.java) | Java program that converts the source between formats       |
+| [Commodore.java](Commodore.java) | Removes conditionals to create a streamlined Commodore build |
 
 ## Original README
 
