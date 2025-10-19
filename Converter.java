@@ -57,9 +57,8 @@ public class Converter {
     Path inputFile = Path.of(args[0]);
     Path outputFile = Path.of(args[1]);
 
-    System.out.printf("Convert MACRO-10 source file to cc65 syntax\n");
-    System.out.printf("Input File: %s\n", inputFile.toString());
-    System.out.printf("Output File: %s\n", outputFile.toString());
+    System.out.printf("Convert MACRO-10 source file to cc65 syntax in=%s out=%s\n", inputFile.getFileName(),
+        outputFile.getFileName());
 
     Converter converter = new Converter();
     List<String> lines = Files.readAllLines(inputFile);

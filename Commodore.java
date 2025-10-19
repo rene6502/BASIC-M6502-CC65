@@ -224,7 +224,9 @@ public class Commodore {
     return result;
   }
 
-  public static void convert(Path inputFile, Path outputFile, boolean extIO) throws IOException {
+  private static void convert(Path inputFile, Path outputFile, boolean extIO) throws IOException {
+    System.out.printf("Create Commodore version extIO=%b output=%s\n", extIO, outputFile.getFileName());
+
     Commodore commodore = new Commodore(extIO);
     List<String> result = Files.readAllLines(inputFile);
     for (int i = 0; i < 6; i++) {
@@ -240,6 +242,7 @@ public class Commodore {
       throw new IllegalArgumentException("missing input and output filename");
     }
 
-    convert(Path.of(args[0]), Path.of(args[1]), true/* extIO */);
+    boolean extIO = System.getProperty("EXTIO", "1").equals("1");
+    convert(Path.of(args[0]), Path.of(args[1]), extIO);
   }
 }

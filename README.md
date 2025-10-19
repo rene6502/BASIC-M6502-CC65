@@ -31,9 +31,9 @@ the feature flag `force_range` to the ca65 assembler.
 
 ```sh
 >./build.sh
-Convert MACRO-10 source file to cc65 syntax
-Input File: m6502.asm
-Output File: m6502.s
+Convert MACRO-10 source file to cc65 syntax in=m6502.asm out=m6502.s
+Create Commodore version extIO=true output=m6502-cbm.s
+Create Commodore version extIO=false output=m6502-cbm-no-extio.s
 
 ca65 V2.18 - Debian 2.19-2
 CONFIG: REALIO=3
@@ -51,17 +51,22 @@ MD5:    65fbddc1114c5ca4648cf31d6a9a2891
 File:   m6502-cbm.bin
 Length: 8670 bytes
 MD5:    65fbddc1114c5ca4648cf31d6a9a2891
+
+File:   m6502-cbm-no-extio.bin
+Length: 8453 bytes
+MD5:    ed851d586fd204fa406da7a1b8baba6e
 ```
 
 ## Files
 
-| File                             | Description                                                |
-|----------------------------------|------------------------------------------------------------|
-| [m6502.asm](m6502.asm)           | Original MACRO-10 source file                               |
-| [m6502.s](m6502.s)               | cc65 version capable of building multiple targets           |
-| [m6502-cbm.s](m6502-cbm.s)       | cc65 version streamlined for Commodore-only builds          |
-| [Converter.java](Converter.java) | Java program that converts the source between formats       |
-| [Commodore.java](Commodore.java) | Removes conditionals to create a streamlined Commodore build |
+| File                                         | Description                                                               |
+|----------------------------------------------|---------------------------------------------------------------------------|
+| [m6502.asm](m6502.asm)                       | Original MACRO-10 source file                                             |
+| [m6502.s](m6502.s)                           | cc65 version capable of building multiple targets                         |
+| [m6502-cbm.s](m6502-cbm.s)                   | cc65 version streamlined for Commodore-only build (external I/O enabled)  |
+| [m6502-cbm-no-extio.s](m6502-cbm-no-extio.s) | cc65 version streamlined for Commodore-only build (external I/O disabled) |
+| [Converter.java](Converter.java)             | Java program that converts the source between formats                     |
+| [Commodore.java](Commodore.java)             | Removes conditionals to create a streamlined Commodore build              |
 
 ## Original README
 
