@@ -32,8 +32,8 @@ the feature flag `force_range` to the ca65 assembler.
 ```sh
 >./build.sh
 Convert MACRO-10 source file to cc65 syntax in=m6502.asm out=m6502.s
-Create Commodore version extIO=true output=m6502-cbm.s
-Create Commodore version extIO=false output=m6502-cbm-no-extio.s
+Create formatted source m6502-cbm.s, REALIO=3
+Create formatted source m6502-min.s, REALIO=3, EXTIO=0, TIME=0, CBMRND=0
 
 ca65 V2.18 - Debian 2.19-2
 CONFIG: REALIO=3
@@ -44,7 +44,7 @@ CONFIG: SAVE AND LOAD
 CONFIG: ROM
 CONFIG: USE ROR INSTRUCTION
 
-File:   commodore.bin
+File:   m6502.bin
 Length: 8670 bytes
 MD5:    65fbddc1114c5ca4648cf31d6a9a2891
 
@@ -52,21 +52,24 @@ File:   m6502-cbm.bin
 Length: 8670 bytes
 MD5:    65fbddc1114c5ca4648cf31d6a9a2891
 
-File:   m6502-cbm-no-extio.bin
-Length: 8453 bytes
-MD5:    ed851d586fd204fa406da7a1b8baba6e
+File:   m6502-min.bin
+Length: 8219 bytes
+MD5:    c6f2259aed023f2891687cee4cb62cdd
 ```
 
 ## Files
 
-| File                                         | Description                                                               |
-|----------------------------------------------|---------------------------------------------------------------------------|
-| [m6502.asm](m6502.asm)                       | Original MACRO-10 source file                                             |
-| [m6502.s](m6502.s)                           | cc65 version capable of building multiple targets                         |
-| [m6502-cbm.s](m6502-cbm.s)                   | cc65 version streamlined for Commodore-only build (external I/O enabled)  |
-| [m6502-cbm-no-extio.s](m6502-cbm-no-extio.s) | cc65 version streamlined for Commodore-only build (external I/O disabled) |
-| [Converter.java](Converter.java)             | Java program that converts the source between formats                     |
-| [Commodore.java](Commodore.java)             | Removes conditionals to create a streamlined Commodore build              |
+| File                             | Description                                                                          |
+|----------------------------------|--------------------------------------------------------------------------------------|
+| [m6502.asm](m6502.asm)           | Original MACRO-10 source file                                                        |
+| [m6502.s](m6502.s)               | cc65 version capable of building multiple targets                                    |
+| [m6502-cbm.s](m6502-cbm.s)       | cc65 version formatted for Commodore-only build (binary matches distributed version) |
+| [m6502-min.s](m6502-min.s)       | cc65 version based on Commodore but with minimal hardware dependencies               |
+|                                  | EXTIO=0 -> external I/O removed                                                      |
+|                                  | TIME=0 -> time function (TI$) removed                                                |
+|                                  | CBMRND=0 -> VIA timer access removed from RND function                               |
+| [Converter.java](Converter.java) | Java program that converts the source between formats                                |
+| [Formatter.java](Formatter.java) | Formats source, removes conditionals and allows overwriting of configuration         |
 
 ## Original README
 

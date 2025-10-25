@@ -183,6 +183,18 @@ public class Converter {
         \tBLOCK\t100\t\t;SPACE FOR TEMP STACK.>
         """);
 
+    // rearrange comment to allow easier removal of assignment
+    result = replaceTextBlock(result, """
+        BUFOFS=0\t\t\t;THE AMOUNT TO OFFSET THE LOW BYTE
+        \t\t\t\t;OF THE TEXT POINTER TO GET TO BUF
+        \t\t\t\t;AFTER TXTPTR HAS BEEN SETUP TO POINT INTO BUF
+        """, """
+        \t\t\t\t;BUFOFS IS THE AMOUNT TO OFFSET THE LOW BYTE
+        \t\t\t\t;OF THE TEXT POINTER TO GET TO BUF**
+        \t\t\t\t;AFTER TXTPTR HAS BEEN SETUP TO POINT INTO BUF
+        BUFOFS=0
+        """);
+
     // fix LOFBUF and FBUFFR for Commodore
     result = replaceTextBlock(result, """
         LOFBUF: BLOCK\t1\t\t;THE LOW FAC BUFFER. COPYABLE.
@@ -220,6 +232,49 @@ public class Converter {
         """, """
         \tJMP\tFLOAT>
         GOMOVF:
+        """);
+
+    // insert new symbol for Commodore RND function
+    result = replaceTextBlock(result, """
+        IFE\tREALIO-3,<
+        \tDISKO==1
+        """, """
+        CBMRND .SET 0\t\t;FLAG TO ENABLE COMMODORE VIA TIMER FOR RND FUNCTION
+        IFE\tREALIO-3,<
+        CBMRND .SET 1\t\t;USE COMMODORE VIA TIMER FOR RND FUNCTION
+        \tDISKO==1
+        """);
+
+    result = replaceTextBlock(result, """
+        IFN\tREALIO-3,<
+        \tTAX>\t\t\t;GET INTO ACCX, SINCE "MOVFM" USES ACCX.
+        """, """
+        IFE\tCBMRND,<
+        \tTAX>\t\t\t;GET INTO ACCX, SINCE "MOVFM" USES ACCX.
+        """);
+
+    result = replaceTextBlock(result, """
+        IFE\tREALIO-3,<
+        \tBNE\tQSETNR
+        """, """
+        IFN\tCBMRND,<
+        \tBNE\tQSETNR
+        """);
+
+    result = replaceTextBlock(result, """
+        IFN\tREALIO-3,<
+        \tTXA\t\t\t;FAC WAS ZERO?
+        """, """
+        IFE\tCBMRND,<
+        \tTXA\t\t\t;FAC WAS ZERO?
+        """);
+
+    result = replaceTextBlock(result, """
+        IFE\tREALIO-3,<
+        \tLDX\tFACMOH
+        """, """
+        IFN\tCBMRND,<
+        \tLDX\tFACMOH
         """);
 
     // insert missing NOP for Commodore
@@ -423,9 +478,7 @@ public class Converter {
     } else if (!testEqual && expr.equals("STKEND-511")) {
       condition = "STKEND<>511";
     } else if (!testEqual && expr.equals("<<BUF+BUFLEN>/256>-<<BUF-1>/256>")) {
-      condition = "1 ; ((BUF+BUFLEN)/256)-((BUF-1)/256)";
-    } else if (expr.equals("1")) {
-      condition = "1";
+      condition = "BUFPAG<>0";
     } else {
       throw new IllegalArgumentException("unsupported expression " + expr);
     }

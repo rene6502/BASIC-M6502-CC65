@@ -4,8 +4,7 @@
 
 
 
-ADDPRC=1                ;FOR ADDITIONAL PRECISION.
-LONGI=1                 ;LONG INITIALIZATION SWITCH.
+ADDPRC=1                        ;FOR ADDITIONAL PRECISION.
 RAMLOC=$0400
 ROMLOC=$C000
 LINLEN=40
@@ -1534,9 +1533,10 @@ INCRTS: RTS                     ;END OF INCHR.
 ; RESERVED WORD LIST IN THE SAME ORDER THEY
 ; APPEAR IN STMDSP.
 ;
-BUFOFS=(BUF/256)*256            ;THE AMOUNT TO OFFSET THE LOW BYTE
-                                ;OF THE TEXT POINTER TO GET TO BUF
+                                ;BUFOFS IS THE AMOUNT TO OFFSET THE LOW BYTE
+                                ;OF THE TEXT POINTER TO GET TO BUF**
                                 ;AFTER TXTPTR HAS BEEN SETUP TO POINT INTO BUF
+BUFOFS=(BUF/256)*256
 CRUNCH: LDX     TXTPTR          ;SET SOURCE POINTER.
         LDY     #4              ;SET DESTINATION OFFSET.
         STY     DORES           ;ALLOW CRUNCHING.
@@ -2183,47 +2183,6 @@ COPFLT: JMP     MOVVF           ;PUT NUMBER @FORPNT.
 COPSTR:
 PLA             ;IF STRING, NO INTFLG.
 INPCOM:
-        LDY     FORPNT+1        ;TI$?
-        CPY     #ZERO/256       ;ONLY TI$ CAN BE THIS ON ASSIG.
-        BNE     GETSPT          ; WAS NOT TI$.
-        JSR     FREFAC          ;WE WONT NEEDIT.
-        CMP     #6              ;LENGTH CORRECT?
-        BNE     FCERR2
-        LDY     #0              ;YES. DO SETUP.
-        STY     FACEXP          ;ZERO FAC TO START WITH.
-        STY     FACSGN
-TIMELP: STY     FBUFPT          ;SAVE POSOTION.
-        JSR     TIMNUM          ;GET A DIGIT.
-        JSR     MUL10           ;WHOLE QTY BY 10.
-        INC     FBUFPT
-        LDY     FBUFPT
-        JSR     TIMNUM
-        JSR     MOVAF
-        TAX                     ;IF NUM=0 THEN NO MULT.
-        BEQ     NOML6           ;IF =0, GO TIT.
-        INX                     ;MULT BY TWO.
-        TXA
-        JSR     FINML6          ;ADD IN AND MULT BY 2 GIVES *6.
-NOML6:  LDY     FBUFPT
-        INY
-        CPY     #6              ;DONE ALL SIX?
-        BNE     TIMELP
-        JSR     MUL10           ;ONE LAST TIME.
-        JSR     QINT            ;SHIFT IT OVER TO THE RIGHT.
-        LDX     #2
-        SEI                     ;DISALLOW INTERRUPTS.
-TIMEST: LDA     FACMOH,X
-        STA     CQTIMR,X
-        DEX
-        BPL     TIMEST          ;LOOP 3 TIMES.
-        CLI                     ;TURN ON INTS AGAIN.
-        RTS
-TIMNUM: LDA     (INDEX),Y               ;INDEX SET UP BY FREFAC.
-        JSR     QNUM
-        BCC     GOTNUM
-FCERR2: JMP     FCERR           ;MUST BE NUMERIC STRING.
-GOTNUM: SBC     #'0'-1          ;C IS OFF.
-        JMP     FINLOG          ;ADD IN DIGIT TO FAC.
 
 GETSPT: LDY     #2              ;GET PNTR TO DESCRIPTOR.
         LDA     (FACMO),Y
@@ -2843,26 +2802,10 @@ GONPRC: PLA                     ;GET RID OF RTS ADDR.
 
 ISVAR:  JSR     PTRGET          ;GET A PNTR TO VARIABLE.
 ISVRET: STWD    FACMO
-        LDWD    VARNAM          ;CHECK TIME,TIME$,STATUS.
         LDX     VALTYP
         BEQ     GOOO            ;THE STRING IS SET UP.
         LDX     #0
         STX     FACOV
-        BIT     FACLO           ;AN ARRAY?
-        BPL     STRRTS          ;YES.
-        CMP     #'T'            ;TI$?
-        BNE     STRRTS
-        CPY     #'I'+128
-        BNE     STRRTS
-        JSR     GETTIM          ;YES. PUT TIME IN FACMOH-LO.
-        STY     TENEXP          ;Y=0.
-        DEY
-        STY     FBUFPT
-        LDY     #6              ;SIX    DIGITS TO PRINT.
-        STY     DECCNT
-        LDY     #FDCEND-FOUTBL
-        JSR     FOUTIM          ;CONVERT TO ASCII.
-        JMP     TIMSTR
 STRRTS: RTS
 GOOO:
         LDX     INTFLG
@@ -2876,25 +2819,8 @@ GOOO:
         TXA                     ;GET HIGH IN A.
         JMP     GIVAYF          ;FLOAT AND RETURN.
 GOOOOO:
-        BIT     FACLO           ;AN ARRAY?
-        BPL     GOMOVF          ;YES.
-        CMP     #'T'
-        BNE     QSTATV
-        CPY     #'I'
-        BNE     GOMOVF
-        JSR     GETTIM
-        TYA                     ;FOR FLOATB.
-        LDX     #160            ;SET EXPONNENT.
-        JMP     FLOATB
-GETTIM: LDWDI   (CQTIMR-2)
-        SEI                     ;TURN OF INT SYS.
-        JSR     MOVFM
-        CLI                     ;BACK ON.
-        STY     FACHO           ;ZERO HIGHEST.
-        RTS
 QSTATV:
 GOMOVF:
-        LDWD    FACMO
         JMP     MOVFM           ;MOVE ACTUAL VALUE IN.
                                 ;AND RETURN.
 
@@ -3142,14 +3068,6 @@ LDZR:   LDWDI   ZERO            ;SET UP PNTR TO SIMULATED ZERO.
         RTS                     ;FOR STRINGS OR NUMERIC.
                                 ;AND FOR INTEGERS TOO.
 NOTEVL:
-        LDWD    VARNAM
-        CMP     #'T'
-        BNE     QSTAVR
-        CPY     #'I'+128
-        BEQ     LDZR
-        CPY     #'I'
-        BNE     QSTAVR
-GOBADV: JMP     SNERR
 QSTAVR:
 VAROK:  LDWD    ARYTAB
         STWD    LOWTR           ;LOWEST THING TO MOVE.
@@ -5258,8 +5176,6 @@ FOUTCM: TXA                     ;COMPLEMENT ACCX
         AND     #$80            ;SAVE ONLY MSB.
         TAX
         CPY     #FDCEND-FOUTBL
-        BEQ     FOULDY
-        CPY     #TIMEND-FOUTBL
         BNE     FOUT2           ;CONTINUE WITH OUTPUT.
 FOULDY: LDY     FBUFPT          ;GET BACK OUTPUT PNTR.
 FOUT11: LDA     FBUFFR-1,Y      ;REMOVE TRAILING ZEROES.
@@ -5344,31 +5260,6 @@ FOUTBL: .BYTE 250       ;-100,000,000
         .BYTE 255
         .BYTE 255
 FDCEND:
-        .BYTE 255       ; -2160000 FOR TIME CONVERTER.
-        .BYTE 223
-        .BYTE 10
-        .BYTE 128
-        .BYTE 0 ; 216000
-        .BYTE 3
-        .BYTE 75
-        .BYTE 192
-        .BYTE 255       ; -36000
-        .BYTE 255
-        .BYTE 115
-        .BYTE 96
-        .BYTE 0 ; 3600
-        .BYTE 0
-        .BYTE 14
-        .BYTE 16
-        .BYTE 255       ; -600
-        .BYTE 255
-        .BYTE 253
-        .BYTE 168
-        .BYTE 0 ; 60
-        .BYTE 0
-        .BYTE 0
-        .BYTE 60
-TIMEND:
 
 ; SUBTTL        EXPONENTIATION AND SQUARE ROOT FUNCTION.
         ;SQUARE ROOT FUNCTION --- SQR(A)
@@ -5589,23 +5480,12 @@ RADDZC: .BYTE 104
         .BYTE 70
 
 RND:    JSR     SIGN            ;GET SIGN INTO ACCX.
+        TAX                     ;GET INTO ACCX, SINCE "MOVFM" USES ACCX.
         BMI     RND1            ;START NEW SEQUENCE IF NEGATIVE.
-        BNE     QSETNR
-                ;TIMERS ARE AT 9044(L0),45(HI),48(LO),49(HI) HEX.
-                ;FIRST TWO ARE ALWAYS FREE RUNNING.
-                ;SECOND PAIR IS NOT. LO IS FREER THAN HI THEN.
-                ;SO ORDER IN FAC IS 44,48,45,49.
-        LDA     CQHTIM
-        STA     FACHO
-        LDA     CQHTIM+4
-        STA     FACMOH
-        LDA     CQHTIM+1
-        STA     FACMO
-        LDA     CQHTIM+5
-        STA     FACLO
-        JMP     STRNEX
 QSETNR: LDWDI   RNDX            ;GET LAST ONE INTO FAC.
         JSR     MOVFM
+        TXA                     ;FAC WAS ZERO?
+        BEQ     RANDRT          ;RESTORE LAST ONE.
         LDWDI   RMULZC          ;MULTIPLY BY RANDOM CONSTANT.
         JSR     FMULT
         LDWDI   RADDZC
@@ -5614,10 +5494,6 @@ RND1:   LDX     FACLO
         LDA     FACHO
         STA     FACLO
         STX     FACHO           ;REVERSE HO AND LO.
-        LDX     FACMOH
-        LDA     FACMO
-        STA     FACMOH
-        STX     FACMO
 STRNEX: CLR     FACSGN          ;MAKE NUMBER POSITIVE.
         LDA     FACEXP          ;PUT EXP WHERE IT WILL
         STA     FACOV           ;BE SHIFTED IN BY NORMAL.

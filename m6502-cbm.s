@@ -4,8 +4,7 @@
 
 
 
-ADDPRC=1                ;FOR ADDITIONAL PRECISION.
-LONGI=1                 ;LONG INITIALIZATION SWITCH.
+ADDPRC=1                        ;FOR ADDITIONAL PRECISION.
 RAMLOC=$0400
 ROMLOC=$C000
 LINLEN=40
@@ -1557,9 +1556,10 @@ INCRTS: RTS                     ;END OF INCHR.
 ; RESERVED WORD LIST IN THE SAME ORDER THEY
 ; APPEAR IN STMDSP.
 ;
-BUFOFS=(BUF/256)*256            ;THE AMOUNT TO OFFSET THE LOW BYTE
-                                ;OF THE TEXT POINTER TO GET TO BUF
+                                ;BUFOFS IS THE AMOUNT TO OFFSET THE LOW BYTE
+                                ;OF THE TEXT POINTER TO GET TO BUF**
                                 ;AFTER TXTPTR HAS BEEN SETUP TO POINT INTO BUF
+BUFOFS=(BUF/256)*256
 CRUNCH: LDX     TXTPTR          ;SET SOURCE POINTER.
         LDY     #4              ;SET DESTINATION OFFSET.
         STY     DORES           ;ALLOW CRUNCHING.
